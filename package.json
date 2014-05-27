@@ -1,0 +1,27 @@
+{
+  "name": "DragonBack",
+  "version": "0.0.0",
+  "description": "Backend RESTFul service for LionRock web interface.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies":{
+    "express": "3.x.x",
+    "mongoose": "3.8.x"
+  },
+  "engines":{
+    "node" : "0.10.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "todo"
+  },
+  "keywords": [
+    "restful",
+    "backend"
+  ],
+  "author": "tonylui",
+  "license": "ISC"
+}
