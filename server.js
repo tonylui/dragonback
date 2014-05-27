@@ -2,10 +2,15 @@ var express = require('express');
 var mongoose = require('mongoose');
 var app = express();
 
+var mongodbUrl = 
+process.env.MONGOLAB_URI ||
+process.env.MONGOHQ_URL ||
+'mongodb://localhost/routes';
+
 //TODO refactor mongoose part to a seperate module
 //TODO add password / authentication checking for mongo db
 //Connect to default port 27017
-mongoose.connect('mongodb://localhost/routes');
+mongoose.connect(mongodbUrl);
 db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function callback(){
