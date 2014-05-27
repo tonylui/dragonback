@@ -125,4 +125,6 @@ app.delete('/routes/:id', function(req,res){
 
 });
 
-app.listen(5000, function(){console.log('Listening to port: ' + 5000)});
+var port = Number(process.env.PORT || 5000);
+
+app.listen(port, function(){console.log('Listening to port: ' + port)});
