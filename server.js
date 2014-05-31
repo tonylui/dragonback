@@ -1,134 +1,33 @@
 var express = require('express');
-var mongoose = require('mongoose');
+var trails = require('./lib/trail.js');
 var app = express();
 
-var mongodbUrl = 
-process.env.MONGOLAB_URI ||
-process.env.MONGOHQ_URL ||
-'mongodb://localhost/routes';
-
-//TODO refactor mongoose part to a seperate module
-//TODO add password / authentication checking for mongo db
-//Connect to default port 27017
-mongoose.connect(mongodbUrl);
-db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function callback(){
-	console.log('connect to mongo successfully');
-});
-
-var routeSchema = mongoose.Schema({
-	name: String,
-	category: String,
-	author: String,
-	dateUpdated: String,
-	mapUrl: String,
-	description: String,
-	imgUrl: String,
-	guides: [{imgUrl: String, explaination: String}],
-	meta:{
-		votes: Number,
-		favs: Number
-	}
-});
-
-var Route = mongoose.model('Route', routeSchema);
-
 app.use(express.json());
+
+app.all('*', function(req, res, next){
+  // if (!req.get('Origin')) return next();
+  // use "*" here to accept any origin
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  // res.set('Access-Control-Allow-Max-Age', 3600);
+  if ('OPTIONS' == req.method) return res.send(200);
+  next();
+});
 
 app.get('/', function(req,res){
 	res.send("DragonBack is available");
 })
 
-app.get('/routes', function(req,res){
-	Route.find(function(err, routes){
-		if(err){
-			res.send("Fail to load routes with error: "+ err);
-		}
-		res.send(routes);
-	});
-});
+app.get('/trails', trails.getAllTrails);
 
-app.get('/routes/:searchKey/:searchValue', function(req,res){
-	var query = Route.find();
+app.get('/trails/:searchKey/:searchValue', trails.searchTrail);
 
-	query.where(req.params.searchKey).equals(req.params.searchValue);
+app.post('/trails', trails.addTrail);
 
-	query.exec(function(err, route){
-		if(err){
-			console.error("Fail to load route with error: " + err);
-			res.send("Error: " + err);
-		}
-		res.send(route);
-	});
-});
+app.put('/trails/:id', trails.updateTrail);
 
-app.post('/routes', function(req,res){
-	//TODO error handling when request is not in json format
-	var newRoute = new Route({
-		name: req.body.name,
-		category: req.body.category,
-		author: req.body.author,
-		dateUpdated: new Date(),
-		mapUrl: req.body.mapUrl,
-		imgUrl: req.body.imgUrl,
-		descrption: req.body.description,
-		guides: req.body.guides,
-	});
-	newRoute.save(function(err, newRoute){
-		if(err){
-			console.error(err);
-			res.send("ERROR: "+ err);
-		}
-		console.log('successfully saved route:' + newRoute);
-		res.send(newRoute.toString());
-	});
-});
-
-app.put('/routes/:id', function(req,res){
-
-	var query = Route.find();
-
-	query.where('_id').equals(req.params.id);
-
-	query.exec(function(err, route){
-		if(err){
-			console.error("Fail to load route with error: " + err);
-			return res.send("Error: " + err);
-		}
-	});
-
-	query.update(req.body, function(err, numberAffected){
-		if(err){
-			res.send("ERROR: " + err);
-		}
-		res.send("Updated " + numberAffected + " record(s)" );
-	});
-	
-});
-
-app.delete('/routes/:id', function(req,res){
-	//TODO Need some checking
-		var query = Route.find();
-
-	query.where('_id').equals(req.params.id);
-
-	query.exec(function(err, route){
-		if(err){
-			console.error("Fail to load route with error: " + err);
-			return res.send("Error: " + err);
-		}
-	});
-
-	query.remove(function(err){
-		if(err){
-			console.error("Error out: " + err);
-			return res.send("Error out: " + err);
-		}
-		res.send("successfully removed one record");
-	});
-
-});
+app.delete('/trails/:id', trails.deleteTrail);
 
 var port = Number(process.env.PORT || 5000);
 
